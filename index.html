@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Glicêmico Domiciliar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" crossorigin="anonymous" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
+        .legend-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .legend-container p {
+            margin-right: 20px;
+        }
+        #inputs{
+            text-align: center;
+        }
+        #inputs label {
+            display: inline-block;
+            width: 50px; /* Ajuste conforme necessário */
+            margin-bottom: 10px;
+        }
+        #inputs input {
+            display: inline-block;
+            width: calc(50% - 55px); /* Ajuste conforme necessário */
+            margin-bottom: 10px;
+        }
+        #inputs input[type="date"] {
+            width: calc(50% - 54px); /* Ajuste conforme necessário */
+        }
+        #inputs button {
+            display: block;
+            margin-top: 10px;
+            text-align: -webkit-center;
+        }
+        #inputs .centralizar{
+            text-align: -webkit-center;
+        }
+        #legend {
+            bottom: 0;
+        }
+        .label22h {
+            width: 70px !important;
+        }
+    </style>
+
+</head>
+<body>
+<h1>Controle Glicêmico Domiciliar</h1>
+
+<div class="legend-container">
+
+    <div id="inputs" class="row">
+        <div class="col-md-6">
+            <label for="dataInput">Data:</label>
+            <input type="date" id="dataInput" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="acInput">AC:</label>
+            <input type="number" id="acInput" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="dcInput">DC:</label>
+            <input type="number" id="dcInput" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="aaInput">AA:</label>
+            <input type="number" id="aaInput" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="daInput">DA:</label>
+            <input type="number" id="daInput" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="ajInput">AJ:</label>
+            <input type="number" id="ajInput" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="djInput">DJ:</label>
+            <input type="number" id="djInput" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="22hInput" class="label22h">22 horas:</label>
+            <input type="number" id="22hInput" class="form-control">
+        </div>
+        <div class="col-md-12 centralizar">
+            <button type="button" class="btn btn-primary" onclick="adicionarDados()">Adicionar dados</button>
+        </div>
+    </div>
+
+</div>
+
+<div class="table-container">
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+        <tr>
+            <th>Data</th>
+            <th>AC</th>
+            <th>DC</th>
+            <th>AA</th>
+            <th>DA</th>
+            <th>AJ</th>
+            <th>DJ</th>
+            <th>22 horas</th>
+            <th>Ação</th>
+        </tr>
+        </thead>
+        <tbody id="table-body">
+        <!-- Os dados da tabela serão adicionados dinamicamente aqui -->
+        </tbody>
+    </table>
+</div>
+
+<div id="legend" class="text-muted row">
+    <div class="col-sm-2">
+        <p>AC - antes do café</p>
+    </div>
+    <div class="col-sm-2">
+        <p>DC - depois do café</p>
+    </div>
+    <div class="col-sm-2">
+        <p>AA - antes do almoço</p>
+    </div>
+    <div class="col-sm-2">
+        <p>DA - depois do almoço</p>
+    </div>
+    <div class="col-sm-2">
+        <p>AJ - antes do jantar</p>
+    </div>
+    <div class="col-sm-2">
+        <p>DJ - depois do jantar</p>
+    </div>
+</div>
+
+<script>
+    // Dados de exemplo para preencher a tabela
+    let dados = [];
+
+    // Função para preencher a tabela com os dados
+    function popularTabela() {
+        const tableBody = document.getElementById('table-body');
+        tableBody.innerHTML = '';
+
+        dados.forEach(dado => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${formatarData(dado.data)}</td>
+            <td>${dado.ac}</td>
+            <td>${dado.dc}</td>
+            <td>${dado.aa}</td>
+            <td>${dado.da}</td>
+            <td>${dado.aj}</td>
+            <td>${dado.dj}</td>
+            <td>${dado['22h']}</td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="removerLinha(this)">Apagar</i></button></td>
+        `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Função para formatar a data no formato DD/MM/AAAA
+    function formatarData(data) {
+        const partesData = data.split('-');
+        return `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
+    }
+
+    // Função para adicionar dados à tabela
+    function adicionarDados() {
+        const dataInput = document.getElementById('dataInput').value;
+
+        // Verifica se a data foi inserida
+        if (!dataInput) {
+            alert("Por favor, insira uma data.");
+            return;
+        }
+
+        // Verifica se pelo menos um campo além da data foi preenchido
+        const inputs = document.querySelectorAll('#inputs input[type="number"]');
+        let algumCampoPreenchido = false;
+        inputs.forEach(input => {
+            if (input.value.trim() !== '') {
+                algumCampoPreenchido = true;
+            }
+        });
+
+        if (!algumCampoPreenchido) {
+            alert("Preencha pelo menos um campo além da data.");
+            return;
+        }
+
+        // Verifica se a data já existe na tabela
+        const dataExistente = dados.find(dado => dado.data === dataInput);
+
+        if (dataExistente) {
+            // Se a data já existe, atualiza apenas os campos preenchidos
+            inputs.forEach(input => {
+                const campo = input.id.replace('Input', '');
+                const valor = input.value;
+
+                if (valor && valor !== '') {
+                    dataExistente[campo] = valor;
+                }
+            });
+        } else {
+            // Verifica se a data inserida é menor do que a data de algum dado existente na tabela
+            const indexMenorData = dados.findIndex(dado => new Date(dado.data) > new Date(dataInput));
+
+            if (indexMenorData !== -1) {
+                // Insere o novo dado antes do dado existente com a menor data
+                const novoDado = {
+                    data: dataInput,
+                    ac: document.getElementById('acInput').value || '',
+                    dc: document.getElementById('dcInput').value || '',
+                    aa: document.getElementById('aaInput').value || '',
+                    da: document.getElementById('daInput').value || '',
+                    aj: document.getElementById('ajInput').value || '',
+                    dj: document.getElementById('djInput').value || '',
+                    '22h': document.getElementById('22hInput').value || ''
+                };
+                dados.splice(indexMenorData, 0, novoDado);
+            } else {
+                // Se a data não é menor do que nenhuma data existente, adiciona no final do array
+                const novoDado = {
+                    data: dataInput,
+                    ac: document.getElementById('acInput').value || '',
+                    dc: document.getElementById('dcInput').value || '',
+                    aa: document.getElementById('aaInput').value || '',
+                    da: document.getElementById('daInput').value || '',
+                    aj: document.getElementById('ajInput').value || '',
+                    dj: document.getElementById('djInput').value || '',
+                    '22h': document.getElementById('22hInput').value || ''
+                };
+                dados.push(novoDado);
+            }
+        }
+
+        // Atualiza a tabela
+        popularTabela();
+
+        // Limpa os campos de entrada após adicionar os dados
+        limparCampos();
+    }
+
+    // Função para limpar os campos de entrada após adicionar os dados
+    function limparCampos() {
+        const inputs = document.querySelectorAll('#inputs input[type="number"]');
+        inputs.forEach(input => {
+            input.value = '';
+        });
+    }
+
+    function removerLinha(botao) {
+        const row = botao.parentNode.parentNode;
+        const index = Array.from(row.parentNode.children).indexOf(row);
+        dados.splice(index, 1);
+        popularTabela();
+    }
+
+    // Chama a função para preencher a tabela quando a página é carregada
+    window.onload = popularTabela;
+</script>
+
+</body>
+</html>
