@@ -20,6 +20,9 @@
         .table-container {
             margin-top: 20px;
         }
+        .table-container button {
+            font-weight: 600;
+        }
         .legend-container {
             display: flex;
             justify-content: space-between;
@@ -48,6 +51,7 @@
             display: block;
             margin: 10px 5px;
             text-align: -webkit-center;
+            font-weight: 600;
         }
         #inputs .centralizar{
             text-align: -webkit-center;
@@ -57,7 +61,7 @@
         }
         .header {
             width: 100%;
-            background-color: #ffffff;
+            background: linear-gradient(135deg, #a7a3a3 36%, #fdfdfd 100%);
             border-style: outset;
             padding-top: 20px;
         }
@@ -106,7 +110,7 @@
         </div>
         <div class="col-md-12 d-flex justify-content-center">
             <button type="button" class="btn btn-primary" onclick="adicionarDados()">Adicionar dados</button>
-            <button type="button" class="btn btn-danger" onclick="limparTabela()">Limpar Tabela</button>
+            <button type="button" class="btn btn-danger" onclick="limparTabela()">Limpar tabela</button>
         </div>
     </div>
 
@@ -171,7 +175,10 @@
     // Função para preencher a tabela com os dados
     function popularTabela() {
         const tableBody = document.getElementById('table-body');
-        tableBody.innerHTML = '';
+        if (tableBody.innerHTML.trim() === '') {
+            // Se a tabela estiver vazia, exibe o cabeçalho novamente
+            document.querySelector('table thead').style.display = 'table-header-group';
+        }
 
         dados.forEach((dado, index) => {
             const row = document.createElement('tr');
@@ -289,8 +296,10 @@
     function limparTabela() {
         // Limpa a variável 'dados'
         dados = [];
-        // Atualiza a tabela
-        popularTabela();
+        // Remove o conteúdo do tbody
+        document.getElementById('table-body').innerHTML = '';
+        // Remove o cabeçalho da tabela
+        document.querySelector('table thead').style.display = 'none';
         // Salva os dados limpos no armazenamento local
         salvarDadosLocalStorage();
     }
