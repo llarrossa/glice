@@ -15,6 +15,7 @@
         h1 {
             text-align: center;
             margin-bottom: 20px;
+            font-family: OCR A Std, monospace;
         }
         .table-container {
             margin-top: 20px;
@@ -32,20 +33,20 @@
         }
         #inputs label {
             display: inline-block;
-            width: 50px; /* Ajuste conforme necessário */
+            width: 50px;
             margin-bottom: 10px;
         }
         #inputs input {
             display: inline-block;
-            width: calc(50% - 55px); /* Ajuste conforme necessário */
+            width: calc(50% - 55px);
             margin-bottom: 10px;
         }
         #inputs input[type="date"] {
-            width: calc(50% - 54px); /* Ajuste conforme necessário */
+            width: calc(50% - 54px);
         }
         #inputs button {
             display: block;
-            margin-top: 10px;
+            margin: 10px 5px;
             text-align: -webkit-center;
         }
         #inputs .centralizar{
@@ -54,14 +55,19 @@
         #legend {
             bottom: 0;
         }
-        .label22h {
-            width: 70px !important;
+        .header {
+            width: 100%;
+            background-color: #ffffff;
+            border-style: outset;
+            padding-top: 20px;
         }
     </style>
 
 </head>
 <body>
-<h1>Controle Glicêmico</h1>
+<div class="header mb-5">
+    <h1>Controle Glicêmico</h1>
+</div>
 
 <div class="legend-container">
 
@@ -95,11 +101,12 @@
             <input type="number" id="djInput" class="form-control">
         </div>
         <div class="col-md-6">
-            <label for="22hInput" class="label22h">22 horas:</label>
+            <label for="22hInput" class="label22h">22 hrs:</label>
             <input type="number" id="22hInput" class="form-control">
         </div>
-        <div class="col-md-12 centralizar">
+        <div class="col-md-12 d-flex justify-content-center">
             <button type="button" class="btn btn-primary" onclick="adicionarDados()">Adicionar dados</button>
+            <button type="button" class="btn btn-danger" onclick="limparTabela()">Limpar Tabela</button>
         </div>
     </div>
 
@@ -116,7 +123,7 @@
             <th>DA</th>
             <th>AJ</th>
             <th>DJ</th>
-            <th>22 horas</th>
+            <th>22 hrs</th>
             <th>Ação</th>
         </tr>
         </thead>
@@ -147,16 +154,26 @@
     </div>
 </div>
 
+
+
+</body>
+</html>
+
 <script>
-    // Dados de exemplo para preencher a tabela
-    let dados = [];
+    // Carrega os dados da tabela do armazenamento local, se disponíveis
+    let dados = JSON.parse(localStorage.getItem('dados')) || [];
+
+    // Função para salvar os dados da tabela no armazenamento local
+    function salvarDadosLocalStorage() {
+        localStorage.setItem('dados', JSON.stringify(dados));
+    }
 
     // Função para preencher a tabela com os dados
     function popularTabela() {
         const tableBody = document.getElementById('table-body');
         tableBody.innerHTML = '';
 
-        dados.forEach(dado => {
+        dados.forEach((dado, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
             <td>${formatarData(dado.data)}</td>
@@ -167,7 +184,7 @@
             <td>${dado.aj}</td>
             <td>${dado.dj}</td>
             <td>${dado['22h']}</td>
-            <td><button type="button" class="btn btn-danger btn-sm" onclick="removerLinha(this)">Apagar</i></button></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="removerLinha(${index})">Apagar</i></button></td>
         `;
             tableBody.appendChild(row);
         });
@@ -189,6 +206,14 @@
             return;
         }
 
+        // Verifica se a data já existe na tabela
+        const dataExistente = dados.find(dado => dado.data === dataInput);
+
+        if (dataExistente) {
+            alert("Você já preencheu dados nesta data.");
+            return;
+        }
+
         // Verifica se pelo menos um campo além da data foi preenchido
         const inputs = document.querySelectorAll('#inputs input[type="number"]');
         let algumCampoPreenchido = false;
@@ -203,50 +228,35 @@
             return;
         }
 
-        // Verifica se a data já existe na tabela
-        const dataExistente = dados.find(dado => dado.data === dataInput);
+        // Verifica se a data inserida é menor do que a data de algum dado existente na tabela
+        const indexMenorData = dados.findIndex(dado => new Date(dado.data) > new Date(dataInput));
 
-        if (dataExistente) {
-            // Se a data já existe, atualiza apenas os campos preenchidos
-            inputs.forEach(input => {
-                const campo = input.id.replace('Input', '');
-                const valor = input.value;
-
-                if (valor && valor !== '') {
-                    dataExistente[campo] = valor;
-                }
-            });
+        if (indexMenorData !== -1) {
+            // Insere o novo dado antes do dado existente com a menor data
+            const novoDado = {
+                data: dataInput,
+                ac: document.getElementById('acInput').value || '',
+                dc: document.getElementById('dcInput').value || '',
+                aa: document.getElementById('aaInput').value || '',
+                da: document.getElementById('daInput').value || '',
+                aj: document.getElementById('ajInput').value || '',
+                dj: document.getElementById('djInput').value || '',
+                '22h': document.getElementById('22hInput').value || ''
+            };
+            dados.splice(indexMenorData, 0, novoDado);
         } else {
-            // Verifica se a data inserida é menor do que a data de algum dado existente na tabela
-            const indexMenorData = dados.findIndex(dado => new Date(dado.data) > new Date(dataInput));
-
-            if (indexMenorData !== -1) {
-                // Insere o novo dado antes do dado existente com a menor data
-                const novoDado = {
-                    data: dataInput,
-                    ac: document.getElementById('acInput').value || '',
-                    dc: document.getElementById('dcInput').value || '',
-                    aa: document.getElementById('aaInput').value || '',
-                    da: document.getElementById('daInput').value || '',
-                    aj: document.getElementById('ajInput').value || '',
-                    dj: document.getElementById('djInput').value || '',
-                    '22h': document.getElementById('22hInput').value || ''
-                };
-                dados.splice(indexMenorData, 0, novoDado);
-            } else {
-                // Se a data não é menor do que nenhuma data existente, adiciona no final do array
-                const novoDado = {
-                    data: dataInput,
-                    ac: document.getElementById('acInput').value || '',
-                    dc: document.getElementById('dcInput').value || '',
-                    aa: document.getElementById('aaInput').value || '',
-                    da: document.getElementById('daInput').value || '',
-                    aj: document.getElementById('ajInput').value || '',
-                    dj: document.getElementById('djInput').value || '',
-                    '22h': document.getElementById('22hInput').value || ''
-                };
-                dados.push(novoDado);
-            }
+            // Se a data não é menor do que nenhuma data existente, adiciona no final do array
+            const novoDado = {
+                data: dataInput,
+                ac: document.getElementById('acInput').value || '',
+                dc: document.getElementById('dcInput').value || '',
+                aa: document.getElementById('aaInput').value || '',
+                da: document.getElementById('daInput').value || '',
+                aj: document.getElementById('ajInput').value || '',
+                dj: document.getElementById('djInput').value || '',
+                '22h': document.getElementById('22hInput').value || ''
+            };
+            dados.push(novoDado);
         }
 
         // Atualiza a tabela
@@ -254,6 +264,9 @@
 
         // Limpa os campos de entrada após adicionar os dados
         limparCampos();
+
+        // Salva os dados no armazenamento local após a atualização
+        salvarDadosLocalStorage();  
     }
 
     // Função para limpar os campos de entrada após adicionar os dados
@@ -264,16 +277,24 @@
         });
     }
 
-    function removerLinha(botao) {
-        const row = botao.parentNode.parentNode;
-        const index = Array.from(row.parentNode.children).indexOf(row);
+    // Função para remover uma linha da tabela
+    function removerLinha(index) {
         dados.splice(index, 1);
         popularTabela();
+        // Salva os dados no armazenamento local após a atualização
+        salvarDadosLocalStorage();
     }
 
-    // Chama a função para preencher a tabela quando a página é carregada
-    window.onload = popularTabela;
-</script>
+    // Função para limpar todos os dados da tabela
+    function limparTabela() {
+        // Limpa a variável 'dados'
+        dados = [];
+        // Atualiza a tabela
+        popularTabela();
+        // Salva os dados limpos no armazenamento local
+        salvarDadosLocalStorage();
+    }
 
-</body>
-</html>
+    window.onload = popularTabela;
+
+</script>
