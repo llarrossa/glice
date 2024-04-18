@@ -273,7 +273,9 @@
         limparCampos();
 
         // Salva os dados no armazenamento local após a atualização
-        salvarDadosLocalStorage();  
+        salvarDadosLocalStorage();
+
+        window.location.reload();
     }
 
     // Função para limpar os campos de entrada após adicionar os dados
@@ -290,6 +292,7 @@
         popularTabela();
         // Salva os dados no armazenamento local após a atualização
         salvarDadosLocalStorage();
+        window.location.reload();
     }
 
     // Função para limpar todos os dados da tabela
